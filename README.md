@@ -1,5 +1,5 @@
-Auth Server API, PHP Auth Server client
-================================================
+Auth Server API
+===============
 
 [![Build Status](https://secure.travis-ci.org/guzzle/guzzle.png?branch=master)](http://travis-ci.org/guzzle/guzzle)
 
@@ -74,6 +74,10 @@ After installing, you need to require Composer's autoloader:
 ```php
 require 'vendor/autoload.php';
 ```
+Sample app
+----------
+Check out [Auth Server Demo App](https://github.com/spandansingh/auth-server-demo-app) for a quick sample app.
+
 Consultation
 ---------
 - Spandan Singh
