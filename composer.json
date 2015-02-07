@@ -1,0 +1,23 @@
+{
+	"name": "spandansingh/auth-server-api",
+	"description": "Auth Server API for PHP",
+	"keywords": ["api", "vigyaa", "AuthServer"],
+	"type": "api",
+    "homepage": "https://github.com/spandansingh/auth-server-api",
+    "authors": [
+        {
+            "name": "Spandan Singh",
+            "homepage": "https://github.com/spandansingh"
+        }
+    ],
+	"require":{
+		"php": ">=5.4.0",
+		"guzzlehttp/guzzle": "~4.0"
+
+	},
+    "autoload": {
+        "psr-4": {
+            "Auth\\": "src/Auth/"
+        }
+    }
+}
