@@ -63,14 +63,23 @@ class ApiClient{
 		}
 	}
 
+	function checkForSessionStatus(){
+		if(session_status() != PHP_SESSION_ACTIVE){
+			trigger_error('Please start the session first');
+			exit();
+		}
+	}
+
 	function isLoggedIn($callback_url = NULL, $login_url = NULL, $token = NULL){
-		
+
+		$this->checkForSessionStatus();
+
 		if(empty($login_url)){
 			$login_url = $this->config['ROOT'] . $this->config['LOGIN_URI'];
 		}
 
 		if(empty($token)){
-			$token = isset($_COOKIE[$this->config['AUTH_TOKEN_NAME']])?$_COOKIE[$this->config['AUTH_TOKEN_NAME']]:NULL;
+			$token = isset($_SESSION[$this->config['AUTH_TOKEN_NAME']])?$_SESSION[$this->config['AUTH_TOKEN_NAME']]:NULL;
 		}
 		
 
@@ -118,13 +127,16 @@ class ApiClient{
 			$callback_uri = $this->getHttpHost();
 		}
 
-		setcookie($this->config['AUTH_TOKEN_NAME'], $token, $this->config['COOKIE_EXPIRE']);
+		$this->checkForSessionStatus();
+
+		$_SESSION[$this->config['AUTH_TOKEN_NAME']] = $token;
 		header('Location:' . $callback_uri);
 		exit();
 	}
 
 	function doLogout(){
-		setcookie($this->config['AUTH_TOKEN_NAME'], $token, time()-3600);
+		$this->checkForSessionStatus();
+		unset($_SESSION[$this->config['AUTH_TOKEN_NAME']]);
 		header('Location:' . $this->config['AUTH_LOGOUT_URL']);
 		exit();
 	}
