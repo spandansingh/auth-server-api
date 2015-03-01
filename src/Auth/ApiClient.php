@@ -99,11 +99,18 @@ class ApiClient{
 		$client = new Client();
 
 		try {
-		    $response = $client->put($url, ['json'=>$params]);
+		    $response = $client->post($url, ['json'=>$params]);
 		    return $response->json()['data'];
 		} catch (RequestException $e) {
 			$response = $e->getResponse();
-			$login_url = $response->json()['login_url'];
+
+			if(isset($response->json()['login_url'])){
+				$login_url = $response->json()['login_url'];
+			}else{
+				print_r($response->json()['message']);
+				exit();
+			}
+
 			header('Location:' . $login_url);
 			exit();
 		}	 
