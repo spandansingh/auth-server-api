@@ -5,21 +5,23 @@ use GuzzleHttp\Exception\RequestException;
 
 class ApiClient{
 	
-	public $config = array();
+	private $config = array();
 	public $user;
 
-	public $compulsory_keys = array(
+	private $compulsory_keys = array(
 		'Auth Key' => 'KEY',
 		'Auth Secret' => 'SECRET',
 		'App Login Uri' => 'LOGIN_URI'
 	);
 
-	public $optional_keys = array(
+	private $optional_keys = array(
 		'AUTH_CHECK_URL',
-		'AUTH_LOGOUT_URL',
-		'COOKIE_EXPIRE',
-		'AUTH_TOKEN_NAME',
+		'AUTH_LOGOUT_URL'
 	);
+
+	private $token;
+
+	private $callback_uri;
 
 	function __construct($config = array()){
 		
@@ -63,23 +65,10 @@ class ApiClient{
 		}
 	}
 
-	function checkForSessionStatus(){
-		if(session_status() != PHP_SESSION_ACTIVE){
-			trigger_error('Please start the session first');
-			exit();
-		}
-	}
-
-	function isLoggedIn($callback_url = NULL, $login_url = NULL, $token = NULL){
-
-		$this->checkForSessionStatus();
+	function isLoggedIn($token = NULL, $callback_url = NULL, $login_url = NULL){
 
 		if(empty($login_url)){
 			$login_url = $this->config['ROOT'] . $this->config['LOGIN_URI'];
-		}
-
-		if(empty($token)){
-			$token = isset($_SESSION[$this->config['AUTH_TOKEN_NAME']])?$_SESSION[$this->config['AUTH_TOKEN_NAME']]:NULL;
 		}
 		
 
@@ -118,37 +107,45 @@ class ApiClient{
 
 	function doLogin($token = NULL,$callback_uri = NULL){
 
-		if(empty($token)){
-			$token = isset($_GET['token'])?$_GET['token']:NULL;
+		$this->token = $token;
+		$this->callback_uri = $callback_uri;
+
+		if(empty($this->token)){
+			$this->token = isset($_GET['token'])?$_GET['token']:NULL;
 		}
 		
-		if(empty($callback_uri)){
-			$callback_uri = isset($_GET['callback_url'])?$_GET['callback_url']:NULL;	
+		if(empty($this->callback_uri)){
+			$this->callback_uri = isset($_GET['callback_url'])?$_GET['callback_url']:NULL;	
 		}
 
-		if(empty($token)){
-			exit('Empty Auth Token');
+		if(empty($this->token)){
+			return array(
+				'msg' => 'Empty Auth Token',
+				'status' => false
+			);
 		}
 		
-		if(empty($callback_uri)){
-			$callback_uri = $this->getHttpHost();
+		if(empty($this->callback_uri)){
+			$this->callback_uri = $this->getHttpHost();
 		}
-
-		$this->checkForSessionStatus();
-
-		$_SESSION[$this->config['AUTH_TOKEN_NAME']] = $token;
-		header('Location:' . $callback_uri);
-		exit();
+		
+		return array('status'=>true);
 	}
 
-	function doLogout(){
-		$this->checkForSessionStatus();
-		unset($_SESSION[$this->config['AUTH_TOKEN_NAME']]);
+	public function getToken(){
+		return $this->token;
+	}
+
+	public function getCallbackUri(){
+		return $this->callback_uri;
+	}
+
+	public function doLogout(){
 		header('Location:' . $this->config['AUTH_LOGOUT_URL']);
 		exit();
 	}
 
-	function getHttpHost(){
+	public function getHttpHost(){
 		return (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
 	}
 }
