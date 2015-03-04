@@ -1,5 +1,5 @@
 <?php
-namespace Auth;
+namespace AuthServer;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
