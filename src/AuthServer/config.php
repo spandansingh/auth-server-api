@@ -2,8 +2,9 @@
 	
 return 
 	array(
-		'AUTH_CHECK_URL' =>  'http://auth-server.l/check',
-		'AUTH_LOGOUT_URL' =>  'http://auth-server.l/logout'
+		'AUTH_HOME_URL' => 'http://auth-server.mybluemix.net',
+		'AUTH_CHECK_URL' =>  '/check',
+		'AUTH_LOGOUT_URL' =>  '/logout'
 	);
 	
 

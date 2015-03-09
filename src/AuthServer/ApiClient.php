@@ -6,7 +6,7 @@ use GuzzleHttp\Exception\RequestException;
 class ApiClient{
 	
 	private $config = array();
-	public $user;
+	private $user;
 
 	private $compulsory_keys = array(
 		'Auth Key' => 'KEY',
@@ -15,6 +15,7 @@ class ApiClient{
 	);
 
 	private $optional_keys = array(
+		'AUTH_HOME_URL',
 		'AUTH_CHECK_URL',
 		'AUTH_LOGOUT_URL'
 	);
@@ -22,6 +23,8 @@ class ApiClient{
 	private $token;
 
 	private $callback_uri;
+
+	private $client;
 
 	function __construct($config = array()){
 		
@@ -63,10 +66,34 @@ class ApiClient{
 		}else{
 			trigger_error('Please Provide Configurations of Auth Server');
 		}
+
+		$this->client = $this->getGuzzlePHPClient();
+	}
+
+	public function getParams(){
+		return [
+			"key" => $this->config['KEY'],
+			"secret" => $this->config['SECRET']
+		];
+	}
+
+	public function getGuzzlePHPClient(){
+		
+		$this->client = new Client([
+		    'base_url' => $this->config['AUTH_HOME_URL'],
+		    'defaults' => [
+		        'query'   => [
+			        'key' => $this->config['KEY'],
+			        'secret' =>  $this->config['SECRET']
+			    ]
+			]
+		]);
+
+		return $this->client;
 	}
 
 	function isLoggedIn($token = NULL, $callback_url = NULL, $login_url = NULL){
-
+		
 		if(empty($login_url)){
 			$login_url = $this->config['ROOT'] . $this->config['LOGIN_URI'];
 		}
@@ -76,20 +103,14 @@ class ApiClient{
 			$callback_url = $this->getHttpHost() . $_SERVER['REQUEST_URI'];
 		}
 
-		$params = [
-		   "key" => $this->config['KEY'],
-		   "secret" => $this->config['SECRET'],
-		   "token" => $token,
-		   "callback_url" => $callback_url,
-		   "login_url" => $login_url
-		];
-
-		$url = $this->config['AUTH_CHECK_URL'];
-		$client = new Client();
-
+    	$params["token"] = $token;
+	    $params["callback_url"] = $callback_url;
+	    $params["login_url"] = $login_url;
+	    
 		try {
-		    $response = $client->post($url, ['json'=>$params]);
-		    return $response->json()['data'];
+		    $response = $this->client->post('/check', ['json'=>$params]);
+		    $this->user = (object) $response->json()['data'];
+		    return $response->json();
 		} catch (RequestException $e) {
 			$response = $e->getResponse();
 
@@ -141,11 +162,39 @@ class ApiClient{
 	}
 
 	public function doLogout(){
-		header('Location:' . $this->config['AUTH_LOGOUT_URL']);
+		$url = $this->makeUrl($this->config['AUTH_LOGOUT_URL']);
+		header('Location:' . $url);
 		exit();
 	}
 
 	public function getHttpHost(){
 		return (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+	}
+
+	public function user($key = NULL){
+
+		if(!empty($key)){
+			return $this->user->{$key};
+		}
+
+		return $this->user;
+	}
+
+	public function getStudents(){
+
+		try {
+		    $response = $this->client->get('/students/all');
+		    return $response->json();
+		} catch (RequestException $e) {
+			$response = $e->getResponse();
+
+			trigger_error($response->json()['message']);
+		
+			exit();
+		}	 
+	}
+
+	public function makeUrl($uri){
+		return $this->config['AUTH_HOME_URL'] . $uri;
 	}
 }
