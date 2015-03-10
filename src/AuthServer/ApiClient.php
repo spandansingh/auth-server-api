@@ -82,6 +82,9 @@ class ApiClient{
 		$this->client = new Client([
 		    'base_url' => $this->config['AUTH_HOME_URL'],
 		    'defaults' => [
+		 	    'headers' => [
+		 	    	'Accept' => 'application/json'
+		 	    ],
 		        'query'   => [
 			        'key' => $this->config['KEY'],
 			        'secret' =>  $this->config['SECRET']
@@ -180,21 +183,45 @@ class ApiClient{
 		return $this->user;
 	}
 
-	public function getStudents(){
+	public function getStudents($query = NULL){	
 
 		try {
-		    $response = $this->client->get('/students/all');
-		    return $response->json();
+			if(!empty($query)){
+				$params["query"] = json_encode($query);
+				$response = $this->client->post('/students', ['json'=>$params]);
+			}else{
+				  $response = $this->client->get('/students/all');		
+			}
+		  
+		    return $response->json()['data'];
 		} catch (RequestException $e) {
 			$response = $e->getResponse();
-
-			trigger_error($response->json()['message']);
-		
+			$message = isset($response->json()['message']) ? $response->json()['message']:$response->json()['error']['message'];
+			trigger_error($message);
 			exit();
 		}	 
 	}
 
 	public function makeUrl($uri){
 		return $this->config['AUTH_HOME_URL'] . $uri;
+	}
+
+	public function getFaculties($query = NULL){
+		
+		try {
+			if(!empty($query)){
+				$params["query"] = json_encode($query);
+				$response = $this->client->post('/faculties', ['json'=>$params]);
+			}else{
+				  $response = $this->client->get('/faculties/all');		
+			}
+
+		    return $response->json()['data'];
+		} catch (RequestException $e) {
+			$response = $e->getResponse();
+			$message = isset($response->json()['message']) ? $response->json()['message']:$response->json()['error']['message'];
+			trigger_error($message);
+			exit();
+		}	 
 	}
 }
