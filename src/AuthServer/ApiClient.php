@@ -116,11 +116,10 @@ class ApiClient{
 		    return $response->json();
 		} catch (RequestException $e) {
 			$response = $e->getResponse();
-
-			if(isset($response->json()['login_url'])){
+			if(isset($response) && isset($response->json()['login_url'])){
 				$login_url = $response->json()['login_url'];
 			}else{
-				print_r($response->json()['message']);
+				header('Location:' . $this->config['AUTH_HOME_URL'] . '?flash_msg=' . $response->json()['message']);
 				exit();
 			}
 
