@@ -23,33 +23,34 @@ $auth = new Auth\ApiClient(array(
 ));
 ```
 
-- For Testing use 
-
-```php
-define('AUTH_KEY','4783924789374897238947923');
-define('AUTH_SECRET','$2y$10$qT8gRka/U4A.2hm5cXVtkuBcKLCV0Impo72DNOQl6Rz55Z2rYWwTa');
-```
 ### For Check Login Status
 
 - If the user is logged in, it returns the user information array.
 - If it is not logged in, it redirects to the auth server login page
 
 ```php
-if($user = $auth->isLoggedIn()){
-	echo 'Welcome ' . $user['first_name'] . ' ' . $user['last_name'];
-// do your code
-}
+$token = isset($_SESSION[‘auth_server_token’])?$_SESSION[‘auth_server_token’]:NULL ;  // If you save token in session than you can receive it like this .  
+If($user = $auth -> isloggedIn($token)){
+        echo ‘welcome’.$user[‘first_name’].’’.$user[‘last_name’];
+ }     
+
 ```
 
 ### For Login
 
 ```php
-$auth->doLogin();
+$response = $auth -> dologin();
+$token = $auth -> getToken();
+$_SESSION[‘auth_server_token’] = $token;
+header(‘location:’ , $auth ->getcallbackUri());  // After Saving token redirect to the callback_url() 
+session_write_close();
+. 
 ```
 
 ### For Logout
 
 ```php
+unset($_SESSION['auth_server_token']);
 $auth->doLogout();
 ```
 
