@@ -30,7 +30,8 @@ $auth = new Auth\ApiClient(array(
 
 ```php
 $token = isset($_SESSION[‘auth_server_token’])?$_SESSION[‘auth_server_token’]:NULL ;  // If you save token in session than you can receive it like this .  
-If($user = $auth -> isloggedIn($token)){
+
+if($user = $auth -> isloggedIn($token)){
         echo ‘welcome’.$user[‘first_name’].’’.$user[‘last_name’];
  }     
 
