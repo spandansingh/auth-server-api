@@ -5,7 +5,7 @@ use GuzzleHttp\Exception\RequestException;
 
 class ApiClient{
 	
-	private $config = array();
+	public $config = array();
 	private $user;
 
 	private $compulsory_keys = array(
