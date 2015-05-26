@@ -223,4 +223,23 @@ class ApiClient{
 			exit();
 		}	 
 	}
+	
+	public function getPassouts($query = NULL){	
+
+		try {
+			if(!empty($query)){
+				$params["query"] = json_encode($query);
+				$response = $this->client->post('/passouts', ['json'=>$params]);
+			}else{
+				  $response = $this->client->get('/passouts/all');		
+			}
+		  
+		    return $response->json()['data'];
+		} catch (RequestException $e) {
+			$response = $e->getResponse();
+			$message = isset($response->json()['message']) ? $response->json()['message']:$response->json()['error']['message'];
+			trigger_error($message);
+			exit();
+		}	 
+	}
 }
